@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      PROCESSING_SECONDS: "30"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/uploads
+      - backend_instance:/app/instance
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      TARO_APP_API_BASE_URL: http://127.0.0.1:5000/api
+    depends_on:
+      - backend
+    ports:
+      - "10086:10086"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules_npm:/app/node_modules
+
+volumes:
+  backend_uploads:
+  backend_instance:
+  frontend_node_modules_npm:
+

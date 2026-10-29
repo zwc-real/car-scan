@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.local
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.swc/
+backend/instance/
+backend/uploads/*
+!backend/uploads/.gitkeep
+.tmp/
+
