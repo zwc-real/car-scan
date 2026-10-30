@@ -62,6 +62,10 @@ docker compose up --build
 
 源码通过 volume 挂载，前后端都支持开发期热更新。本机不需要单独安装 Python、Node.js 或 npm。
 
+前端依赖绑定到宿主机 `frontend/node_modules`，VS Code 可以直接读取包和 TypeScript 类型。首次启动、`package-lock.json` 或容器 Node/系统版本变化时，入口脚本自动在挂载目录运行 `npm ci`，之后重启会复用已安装的依赖。首次安装完成后，若编辑器仍提示缺少类型，可执行 VS Code 的 `TypeScript: Restart TS Server`。
+
+依赖由 Linux 容器安装；宿主机用于编辑和类型识别，构建与测试仍在 Docker 中执行。更新依赖请使用 `docker compose exec frontend npm install --save-exact 包名@版本`，不要在 Windows 中再次安装到同一个目录，以免混入不兼容的原生二进制。
+
 ## 微信小程序构建
 
 ```powershell
@@ -70,13 +74,17 @@ docker compose run --rm frontend npm run build:weapp
 
 然后在微信开发者工具中打开 `frontend/dist`。真机调试时，把 `.env.development.example` 复制为 `.env.development`，并将 API 地址改成同一局域网内可访问的后端地址；微信小程序还需要在管理后台配置合法请求域名。
 
+小程序产物固定输出到 `frontend/dist`，H5 输出到 `frontend/dist-h5`，避免 Docker 中启动 H5 服务时清空小程序文件。尺寸以 430px 设计稿为准，按 `750 / 430` 换算为 rpx；微信端按窗口、状态栏及胶囊按钮位置预留安全区，H5 桌面限宽样式不会打入小程序产物。
+
+XR-Frame 组件必须保留 `index.js/json/wxml/wxss` 四个文件，并在应用配置中启用 `lazyCodeLoading: 'requiredComponents'`。即使组件不使用常规样式，也不能删除 `index.wxss`，否则微信开发者工具可能报 `Cannot generate sub context file app-wxss.js`。`build:weapp` 完成后会自动检查这些产物；生产构建的 WXSS 可以为空文件。
+
 ## GLB 测试模型
 
 提供的 `Meshy_AI_Emerald_Tufted_Cheste_1030053958_texture.glb` 保存为 `backend/assets/models/placeholder.glb`，约 34.3 MiB、310052 个三角面、2 张内嵌 PBR 贴图。`GET /api/models/placeholder` 返回实际文件信息，`GET /api/models/placeholder.glb` 提供 GLB，并支持 ETag 缓存和 Range 请求。大文件由后端提供，不占用小程序代码包。
 
 H5 使用同版本 Three.js GLTFLoader + OrbitControls，支持鼠标/触摸旋转、滚轮/双指缩放、自动旋转、白模切换和根据视口自动取景。离开预览页时释放动画、纹理、几何与 WebGL 资源；下载失败可重试。
 
-微信端使用官方 XR-Frame 原生组件及轨道相机。请使用支持 XR-Frame 的微信基础库，并在真机上验证；构建通过不代表原生 GPU 渲染已经过真机测试。真机必须把 `TARO_APP_API_BASE_URL` 改为手机可访问的后端地址（不能使用手机自身的 `127.0.0.1`），并按微信要求配置 HTTPS 合法域名。当前模型较大，首次加载耗时取决于网络与设备。
+微信端使用官方 XR-Frame 原生组件。手势参考微信官方 [xr-template-arPreview 示例](https://github.com/wechat-miniprogram/miniprogram-demo/tree/master/miniprogram/packageXRFrame/components/template/xr-template-arPreview)，固定相机，单指位移直接更新模型 Transform，双指按距离比例缩放；不使用内置轨道控制器或手动旋转惯性。触摸即暂停自动旋转，松手后保持角度。手动旋转灵敏度在 `frontend/src/native/glb-scene/index.js` 顶部的 `ROTATE_SPEED` 调整，当前为 `5`，与官方 demo 一致；数值越大越快，`2.5` 为 demo 的一半、`10` 为两倍，横向和纵向共用此参数，不影响缩放与自动旋转。修改后重新运行 `npm run build:weapp`（在 Docker 中执行）。请使用支持 XR-Frame 的微信基础库，并在真机上验证；构建通过不代表原生 GPU 渲染已经过真机测试。真机必须把 `TARO_APP_API_BASE_URL` 改为手机可访问的后端地址（不能使用手机自身的 `127.0.0.1`），并按微信要求配置 HTTPS 合法域名。当前模型较大，首次加载耗时取决于网络与设备。
 
 ## 验证
 
@@ -84,6 +92,10 @@ H5 使用同版本 Three.js GLTFLoader + OrbitControls，支持鼠标/触摸旋�
 docker compose run --rm backend python -m pytest
 docker compose run --rm frontend npm run typecheck
 docker compose run --rm frontend npm run build:weapp
+docker compose run --rm frontend npm run check:weapp-layout
+docker compose run --rm frontend npm run check:weapp-components
+docker compose run --rm frontend npm run test:weapp-interaction
+docker compose run --rm frontend npm run test:weapp-interaction -- --dist
 ```
 
 ## AI 接口替换点

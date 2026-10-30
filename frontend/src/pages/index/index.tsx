@@ -1,6 +1,6 @@
 import { View } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
-import { useCallback, useState } from 'react'
+import Taro, { useDidShow, useResize } from '@tarojs/taro'
+import { useCallback, useState, type CSSProperties } from 'react'
 
 import { VIEWS } from '../../constants/views'
 import { CaptureScreen } from '../../screens/CaptureScreen'
@@ -19,7 +19,29 @@ import './index.scss'
 
 type Screen = 'projects' | 'capture' | 'generating' | 'preview'
 
+function readViewportStyle(): CSSProperties {
+  if (process.env.TARO_ENV !== 'weapp') return {}
+  const info = Taro.getWindowInfo()
+  const statusBarHeight = info.statusBarHeight || 0
+  let top = statusBarHeight + 44
+  try {
+    const capsule = Taro.getMenuButtonBoundingClientRect()
+    if (capsule.bottom > 0) top = Math.max(top, capsule.bottom + 8)
+  } catch {
+    // 无胶囊数据的模拟器使用状态栏 + 标准导航高度。
+  }
+  const bottom = Math.max(0, info.screenHeight - (info.safeArea?.bottom ?? info.screenHeight))
+  // API 返回物理逻辑 px；使用行内样式，不再次经过设计稿的 px→rpx 转换。
+  return {
+    height: `${info.windowHeight}px`,
+    '--app-safe-top': `${top}px`,
+    '--app-safe-bottom': `${Math.max(bottom, 16 * info.windowWidth / 430)}px`,
+  } as CSSProperties
+}
+
 export default function IndexPage() {
+  const [viewportStyle, setViewportStyle] = useState(readViewportStyle)
+  useResize(() => setViewportStyle(readViewportStyle()))
   const [screen, setScreen] = useState<Screen>('projects')
   const [projects, setProjects] = useState<Project[]>([])
   const [selected, setSelected] = useState<Project | null>(null)
@@ -73,7 +95,7 @@ export default function IndexPage() {
   }
 
   return (
-    <View className='app-shell'>
+    <View className={`app-shell app-shell--${process.env.TARO_ENV}`} style={viewportStyle}>
       {screen === 'projects' ? (
         <ProjectsScreen projects={projects} loading={loading} onNew={() => setScreen('capture')} onOpen={openProject} onRetry={loadProjects} />
       ) : null}

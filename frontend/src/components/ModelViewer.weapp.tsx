@@ -20,6 +20,7 @@ export function ModelViewer(props: ModelViewerProps) {
     <glb-scene src={props.url} clay={props.clay} auto={props.auto}
       width={size.width} height={size.height} style='display:block;width:100%;height:100%'
       onModelready={props.onLoaded}
+      onInteract={props.onInteract}
       onModelerror={() => props.onError('模型加载失败，请检查网络或使用支持 XR-Frame 的微信版本')}
     />
   </View>

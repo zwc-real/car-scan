@@ -8,6 +8,7 @@ declare namespace JSX {
       height: number
       style: string
       onModelready: () => void
+      onInteract: () => void
       onModelerror: () => void
     }
   }

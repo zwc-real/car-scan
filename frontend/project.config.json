@@ -2,7 +2,7 @@
   "miniprogramRoot": "dist/",
   "projectname": "toy-scan-miniapp",
   "description": "Toy Scan 玩具车 3D 扫描小程序",
-  "appid": "touristappid",
+  "appid": "wx6b755451cf88ef94",
   "setting": {
     "urlCheck": false,
     "es6": true,
@@ -10,6 +10,6 @@
     "postcss": true,
     "minified": true
   },
-  "compileType": "miniprogram"
+  "compileType": "miniprogram",
+  "isGameTourist": false
 }
-

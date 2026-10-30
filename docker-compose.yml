@@ -14,18 +14,18 @@ services:
   frontend:
     build:
       context: ./frontend
-    environment:
-      TARO_APP_API_BASE_URL: http://127.0.0.1:5000/api
+    # environment:
+      # TARO_APP_API_BASE_URL: http://127.0.0.1:5000/api
     depends_on:
       - backend
     ports:
       - "10086:10086"
     volumes:
       - ./frontend:/app
-      - frontend_node_modules_npm:/app/node_modules
+      # 依赖保存在宿主机，供 VS Code 读取类型；由容器内 npm 安装 Linux 版本。
+      - ./frontend/node_modules:/app/node_modules
 
 volumes:
   backend_uploads:
   backend_instance:
-  frontend_node_modules_npm:
 

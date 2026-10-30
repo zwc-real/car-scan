@@ -7,12 +7,16 @@ $line: rgba(20,20,20,.14);
 $signal: #E5391B;
 $mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 .taro_page.taro_page_show { overflow:hidden; background:#CFCBBF; }
-.app-shell { position:relative; width:100%; max-width:430px; height:100vh; height:100dvh; overflow:hidden; background:$paper; color:$ink; }
+.app-shell { position:relative; width:100%; height:100vh; height:100dvh; overflow:hidden; background:$paper; color:$ink; }
+// H5 的桌面画布才限宽；使用 Px 保留逻辑像素，不让它进入 rpx/rem 缩放。
+/* #ifdef h5 */
+.app-shell--h5 { max-width:430Px; }
+/* #endif */
 .app-shell {
 // H5 组件默认样式晚于全局样式注入，使用画布作用域确保重置生效。
 taro-button-core { width:auto; margin:0; padding:0; border:0; border-radius:0; background:transparent; line-height:normal; color:inherit; }
 taro-button-core::after { border:0; }
-.screen { position:absolute; inset:0; display:flex; flex-direction:column; background:$paper; }
+.screen { position:absolute; top:0; right:0; bottom:0; left:0; display:flex; flex-direction:column; background:$paper; }
 .screen-scroll { flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .safe-top { padding-top:max(env(safe-area-inset-top),16px); }
 .safe-bottom { padding-bottom:max(env(safe-area-inset-bottom),16px); }
@@ -148,4 +152,18 @@ taro-button-core::after { border:0; }
 @keyframes sheet-up { from { transform:translateY(100%); } to { transform:translateY(0); } }
 }
 // 桌面预览保持原型的直角画布，手机端填满视口。
-@media (min-width:768px) { .app-shell { height:860px; max-height:94vh; margin:3vh auto; box-shadow:0 30px 80px rgba(20,20,20,.25); outline:1px solid rgba(20,20,20,.3); } }
+/* #ifdef h5 */
+@media (min-width:768px) { .app-shell--h5 { height:860Px; max-height:94vh; margin:3vh auto; box-shadow:0 30px 80px rgba(20,20,20,.25); outline:1px solid rgba(20,20,20,.3); } }
+/* #endif */
+
+// 微信端使用运行时测得的导航/底部安全区，不依赖 WebView 对 env/max 的支持。
+.app-shell--weapp {
+  max-width:none;
+  margin:0;
+  .safe-top { padding-top:var(--app-safe-top); }
+  .safe-bottom { padding-bottom:var(--app-safe-bottom); }
+  .projects-header { padding:var(--app-safe-top) 20px 0; }
+  .bottom-action { padding:12px 20px var(--app-safe-bottom); }
+  .photo-sheet { padding-bottom:var(--app-safe-bottom); }
+  .model-panel { padding:20px 20px var(--app-safe-bottom); }
+}
