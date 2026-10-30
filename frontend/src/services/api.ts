@@ -1,8 +1,15 @@
 import Taro from '@tarojs/taro'
 
 import type { Project, ProjectStatus, ViewKey } from '../types/project'
+import type { PreviewModel } from '../types/model'
 
 const API_BASE = (process.env.TARO_APP_API_BASE_URL || 'http://127.0.0.1:5000/api').replace(/\/$/, '')
+
+export async function fetchPreviewModel(): Promise<PreviewModel> {
+  const model = await request<PreviewModel>({ url: '/models/placeholder', method: 'GET' })
+  const origin = API_BASE.replace(/\/api$/, '')
+  return { ...model, url: `${origin}${model.url}` }
+}
 
 interface ApiProject {
   id: string

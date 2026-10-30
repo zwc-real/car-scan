@@ -1,0 +1,14 @@
+<xr-scene id="scene" bind:ready="handleReady" bind:tick="handleTick">
+  <xr-assets bind:loaded="handleAssetsLoaded" bind:error="handleError">
+    <xr-asset-material asset-id="preview-clay" effect="standard" uniforms="u_baseColorFactor: 0.85 0.83 0.79 1; u_metallic: 0; u_roughness: 0.85" />
+    <xr-asset-load type="gltf" asset-id="preview-model" src="{{src}}" bind:error="handleError" />
+  </xr-assets>
+  <xr-env env-data="xr-frame-team-workspace-day2" />
+  <xr-node node-id="target" position="0 0 0" />
+  <xr-node rotation="0 {{angle}} 0">
+    <xr-gltf id="loaded-model" model="preview-model" scale="1.26 1.26 1.26" />
+  </xr-node>
+  <xr-camera node-id="camera" position="{{cameraPosition}}" target="target" near="0.01" far="100" clear-color="0.961 0.953 0.933 1" camera-orbit-control />
+  <xr-light type="ambient" color="1 1 1" intensity="1.5" />
+  <xr-light type="directional" rotation="30 210 0" color="1 1 1" intensity="3" />
+</xr-scene>

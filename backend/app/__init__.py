@@ -7,6 +7,7 @@ from flask import Flask, jsonify
 
 from . import db
 from .projects import api
+from .models import models
 
 
 def create_app(test_config: dict | None = None) -> Flask:
@@ -27,6 +28,7 @@ def create_app(test_config: dict | None = None) -> Flask:
 
     db.init_app(app)
     app.register_blueprint(api)
+    app.register_blueprint(models)
 
     @app.after_request
     def add_cors_headers(response):

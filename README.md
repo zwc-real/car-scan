@@ -4,7 +4,7 @@
 
 当前版本完成了项目列表、状态筛选、10 个视角的拍摄/相册选择、照片上传、生成进度、模型预览、重新生成等基础流程。AI/三维重建接口暂未接入，后端使用可替换的本地进度桩模拟生成过程。
 
-界面已按新版 `Untitled (2).zip` 更新为纸色直角布局，包含项目纵向列表、两列拍摄网格、分段生成进度和立体车辆预览。预览车辆沿用原型的 CSS 几何演示，支持自动旋转、触摸旋转、双指缩放和白模切换，并非 AI 重建结果。
+界面已按新版 `Untitled (2).zip` 更新为纸色直角布局，包含项目纵向列表、两列拍摄网格、分段生成进度和真实 GLB 预览。所有项目暂时共用提供的沙发测试模型，页面标注“测试占位模型”，并非 AI 重建结果。
 
 ## 版本基线
 
@@ -16,6 +16,7 @@
 | Taro | 4.2.1 | 所有 `@tarojs/*` 包保持同一版本 |
 | React | 18.3.1 | 使用 Taro 4 的稳定 React 适配组合 |
 | Flask | 3.1.2 | 与 Python 3.12 兼容 |
+| Three.js / 类型 | 0.160.1 / 0.160.0 | 同一 r160 系列；仅用于 H5，支持 WebGL 1/2；微信端使用内置 XR-Frame |
 
 Dockerfile 通过 `docker.1ms.run` 拉取完整补丁版本镜像，前端依赖使用精确版本并提交 `package-lock.json`，Python 完整依赖树保存在 `requirements.lock`，避免重建时自动升级。
 
@@ -29,6 +30,7 @@ car-scan/
 │     ├─ assets/icons/        # 新版原型线稿图标
 │     ├─ components/          # 通用视觉组件
 │     ├─ constants/           # 10 个拍摄视角等常量
+│     ├─ native/glb-scene/    # 微信原生 XR-Frame 模型组件
 │     ├─ pages/index/         # 单页状态流入口
 │     ├─ screens/             # 项目、拍摄、生成、预览页面
 │     ├─ services/            # Flask API 调用
@@ -37,7 +39,9 @@ car-scan/
 │  ├─ app/
 │  │  ├─ __init__.py          # 应用工厂
 │  │  ├─ db.py                # SQLite 连接与初始化
+│  │  ├─ models.py            # 占位模型元数据及支持 Range 的文件接口
 │  │  └─ projects.py          # 项目、照片、生成接口
+│  ├─ assets/models/          # GLB 测试资产，由后端提供
 │  ├─ tests/                  # API 测试
 │  ├─ uploads/                # 本地上传目录
 │  └─ run.py                  # 开发启动入口
@@ -65,6 +69,14 @@ docker compose run --rm frontend npm run build:weapp
 ```
 
 然后在微信开发者工具中打开 `frontend/dist`。真机调试时，把 `.env.development.example` 复制为 `.env.development`，并将 API 地址改成同一局域网内可访问的后端地址；微信小程序还需要在管理后台配置合法请求域名。
+
+## GLB 测试模型
+
+提供的 `Meshy_AI_Emerald_Tufted_Cheste_1030053958_texture.glb` 保存为 `backend/assets/models/placeholder.glb`，约 34.3 MiB、310052 个三角面、2 张内嵌 PBR 贴图。`GET /api/models/placeholder` 返回实际文件信息，`GET /api/models/placeholder.glb` 提供 GLB，并支持 ETag 缓存和 Range 请求。大文件由后端提供，不占用小程序代码包。
+
+H5 使用同版本 Three.js GLTFLoader + OrbitControls，支持鼠标/触摸旋转、滚轮/双指缩放、自动旋转、白模切换和根据视口自动取景。离开预览页时释放动画、纹理、几何与 WebGL 资源；下载失败可重试。
+
+微信端使用官方 XR-Frame 原生组件及轨道相机。请使用支持 XR-Frame 的微信基础库，并在真机上验证；构建通过不代表原生 GPU 渲染已经过真机测试。真机必须把 `TARO_APP_API_BASE_URL` 改为手机可访问的后端地址（不能使用手机自身的 `127.0.0.1`），并按微信要求配置 HTTPS 合法域名。当前模型较大，首次加载耗时取决于网络与设备。
 
 ## 验证
 

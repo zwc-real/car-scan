@@ -9,9 +9,12 @@ car-scan/
 │  │  └─ prod.ts              # 生产环境配置
 │  ├─ src/
 │  │  ├─ components/
-│  │  │  ├─ MiniCar.tsx       # 列表与预览中的车辆插画
+│  │  │  ├─ MiniCar.tsx       # 列表车辆插画
+│  │  │  ├─ ModelViewer.h5.tsx # Three.js GLB 预览与资源释放
+│  │  │  ├─ ModelViewer.weapp.tsx # 微信原生组件适配
 │  │  │  └─ ViewGuide.tsx     # 拍摄角度示意图
 │  │  ├─ constants/views.ts   # 10 个标准拍摄视角
+│  │  ├─ native/glb-scene/    # XR-Frame 原生组件（JS/WXML/JSON）
 │  │  ├─ pages/index/
 │  │  │  ├─ index.config.ts
 │  │  │  ├─ index.scss
@@ -32,8 +35,11 @@ car-scan/
 │  ├─ app/
 │  │  ├─ __init__.py          # Flask 应用工厂、CORS 与错误响应
 │  │  ├─ db.py                # SQLite 生命周期和种子数据
+│  │  ├─ models.py            # GLB 元数据、缓存与文件接口
 │  │  └─ projects.py          # 项目领域 API
 │  ├─ tests/test_api.py
+│  ├─ tests/test_models.py     # GLB 头部、Range 和缓存验证
+│  ├─ assets/models/placeholder.glb # 用户提供的真实测试模型
 │  ├─ uploads/.gitkeep
 │  ├─ requirements.txt
 │  ├─ requirements-dev.txt
