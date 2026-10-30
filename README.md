@@ -47,26 +47,13 @@ car-scan/
 docker compose up --build
 ```
 
-首次启动会进行 Taro 依赖预编译，请等待 `frontend` 状态变为 `healthy`：
-
-```powershell
-docker compose ps
-```
-
 启动后可访问：
 
 - Flask API：`http://127.0.0.1:5000`
 - Taro H5 预览：`http://127.0.0.1:10086`
 - 健康检查：`GET http://127.0.0.1:5000/api/health`
 
-前端仅挂载 `src` 和构建配置，依赖始终使用镜像内 `npm ci` 的结果，避免旧 `node_modules` 卷造成启动失败；前后端均支持开发期热更新。本机不需要单独安装 Python、Node.js 或 npm。
-
-若拉取新代码后页面没有启动，先重新构建并查看日志：
-
-```powershell
-docker compose up --build -d
-docker compose logs -f frontend
-```
+源码通过 volume 挂载，前后端都支持开发期热更新。本机不需要单独安装 Python、Node.js 或 npm。
 
 ## 微信小程序构建
 

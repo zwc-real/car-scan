@@ -6,5 +6,5 @@ RUN npm ci
 COPY . .
 
 EXPOSE 10086
-CMD ["npm", "run", "dev:h5"]
+CMD ["npm", "run", "dev:h5", "--", "--host", "0.0.0.0", "--port", "10086"]
 
