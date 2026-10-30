@@ -21,11 +21,24 @@ services:
     ports:
       - "10086:10086"
     volumes:
-      - ./frontend:/app
-      - frontend_node_modules_npm:/app/node_modules
+      # 仅挂载需要热更新的源码与配置，避免覆盖镜像中由 npm ci 安装的依赖。
+      - ./frontend/src:/app/src
+      - ./frontend/config:/app/config
+      - ./frontend/babel.config.js:/app/babel.config.js
+      - ./frontend/project.config.json:/app/project.config.json
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:10086/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 10s
 
 volumes:
   backend_uploads:
   backend_instance:
-  frontend_node_modules_npm:
 
