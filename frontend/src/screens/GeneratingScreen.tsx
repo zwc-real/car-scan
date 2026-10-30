@@ -1,6 +1,7 @@
 import { Button, Text, View } from '@tarojs/components'
 import { useEffect } from 'react'
 
+import { Icon } from '../components/Icon'
 import { fetchProject } from '../services/api'
 import type { Project } from '../types/project'
 
@@ -36,44 +37,19 @@ export function GeneratingScreen({
     }
     const timer = setInterval(refresh, 1000)
     refresh()
-    return () => {
-      disposed = true
-      clearInterval(timer)
-    }
+    return () => { disposed = true; clearInterval(timer) }
   }, [project.id])
-
   const progress = Math.min(100, Math.round(project.progress))
   return (
     <View className='screen generating-screen safe-top safe-bottom'>
-      <View className='progress-ring' style={{ background: `conic-gradient(#ff5b14 ${progress * 3.6}deg, #e4dfd5 0deg)` }}>
-        <View className='progress-ring__inner'>
-          <Text className='progress-ring__cube'>◇</Text>
-          <Text className='progress-ring__value'>{progress}<Text className='progress-ring__unit'>%</Text></Text>
-        </View>
-      </View>
-      <Text className='generating-title'>{project.status === 'done' ? '模型已生成' : '正在生成 3D 模型'}</Text>
-      <Text className='generating-name'>{project.name}</Text>
-
-      <View className='generation-steps'>
-        {STEPS.map((step) => {
-          const finished = progress >= step.end
-          const active = progress >= step.at && !finished
-          return (
-            <View key={step.label} className={`generation-step ${!finished && !active ? 'generation-step--waiting' : ''}`}>
-              <Text className={`generation-step__status ${finished ? 'is-finished' : active ? 'is-active' : ''}`}>
-                {finished ? '✓' : active ? '•' : ''}
-              </Text>
-              <Text>{step.label}</Text>
-            </View>
-          )
-        })}
-      </View>
-
-      <View className='generating-footer'>
-        <Text className='generating-note'>预计需要 1–3 分钟，可离开页面，完成后在列表查看</Text>
-        <Button className='secondary-button' onClick={onBack}>返回项目列表</Button>
-      </View>
+      <Button className='back-button' onClick={onBack}><Icon name='back' />项目列表</Button>
+      <Text className='generating-label'>{project.status === 'done' ? 'COMPLETE' : 'PROCESSING'} · {project.name}</Text>
+      <View className='generating-value'>{progress}<Text>%</Text></View>
+      <View className='generation-segments'>{Array.from({length:20},(_,i) => <View key={i} className={`generation-segment ${progress >= (i+1)*5 ? 'is-complete' : progress > i*5 ? 'is-active' : ''}`} />)}</View>
+      <View className='generation-steps'>{STEPS.map((step,index) => { const finished = progress >= step.end, active = progress >= step.at && !finished
+        return <View key={step.label} className={`generation-step ${!finished && !active ? 'is-waiting' : ''}`}><View className='generation-step__label'><Text className='step-number'>{String(index+1).padStart(2,'0')}</Text><Text>{step.label}</Text></View><Text className={`step-status ${active ? 'is-active' : ''}`}>{finished ? '完成' : active ? '进行中' : '等待'}</Text></View>
+      })}</View>
+      <Text className='generating-note'>预计 1–3 分钟。你可以离开此页，完成后会出现在项目列表中。</Text>
     </View>
   )
 }
-

@@ -53,14 +53,14 @@ export default function IndexPage() {
 
   const generate = async (name: string, photos: PhotoMap) => {
     try {
-      const sample = VIEWS.every((view) => photos[view.key]?.startsWith('demo://'))
+      const sample = VIEWS.some((view) => photos[view.key]?.startsWith('demo://'))
       let project = await createProject(name, sample)
-      if (!sample) {
-        for (const view of VIEWS) {
-          const path = photos[view.key]
-          if (!path) throw new Error(`缺少“${view.label}”照片`)
-          await uploadProjectPhoto(project.id, view.key, path)
-        }
+      for (const view of VIEWS) {
+        const path = photos[view.key]
+        if (!path) throw new Error(`缺少“${view.label}”照片`)
+        // 示例照片由后端填充，用户替换的真实照片仍照常上传。
+        if (path.startsWith('demo://')) continue
+        await uploadProjectPhoto(project.id, view.key, path)
       }
       project = await startGeneration(project.id)
       setProjects((current) => [project, ...current])

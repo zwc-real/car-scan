@@ -1,7 +1,7 @@
-page {
+page, body {
   min-height: 100%;
-  background: #f5f2ec;
-  color: #1b1a17;
+  background: #CFCBBF;
+  color: #141414;
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
@@ -9,11 +9,18 @@ view,
 text,
 button,
 input,
-image {
+image,
+taro-view-core,
+taro-text-core,
+taro-button-core,
+taro-input-core,
+taro-image-core {
   box-sizing: border-box;
 }
 
-button {
+button, taro-button-core {
+  width: auto;
+  border: 0;
   margin: 0;
   padding: 0;
   line-height: normal;
@@ -21,7 +28,12 @@ button {
   background: transparent;
 }
 
-button::after {
+button::after, taro-button-core::after {
   border: 0;
 }
+
+// Taro H5 的相邻按钮默认带上边距；与设计的 gap 布局统一。
+taro-button-core + taro-button-core { margin-top: 0; }
+
+.taro_router .taro_page { background: #CFCBBF; }
 

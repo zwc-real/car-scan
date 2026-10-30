@@ -1,6 +1,7 @@
-import { Button, Text, View } from '@tarojs/components'
+import { Button, Image, Text, View } from '@tarojs/components'
 import { useMemo, useState } from 'react'
 
+import { Icon } from '../components/Icon'
 import { MiniCar } from '../components/MiniCar'
 import type { Project } from '../types/project'
 
@@ -50,75 +51,22 @@ export function ProjectsScreen({
 
   return (
     <View className='screen projects-screen'>
-      <View className='screen-scroll projects-scroll'>
-        <Text className='eyebrow'>3D 扫描</Text>
-        <Text className='page-title'>我的模型</Text>
-
-        <Button className='new-project-card' onClick={onNew}>
-          <View className='new-project-card__icon'>⌁</View>
-          <View className='new-project-card__copy'>
-            <Text className='new-project-card__title'>新建扫描项目</Text>
-            <Text className='new-project-card__desc'>拍摄玩具车 10 个角度，自动生成 3D 模型</Text>
-          </View>
-          <Text className='new-project-card__arrow'>›</Text>
-        </Button>
-
-        <View className='section-heading'>
-          <Text className='section-heading__title'>历史项目</Text>
-          <Text className='section-heading__count'>{projects.length} 个</Text>
-        </View>
-
-        <View className='filter-tabs'>
-          {TABS.map((item) => (
-            <Button
-              key={item.key}
-              className={`filter-tab ${tab === item.key ? 'filter-tab--active' : ''}`}
-              onClick={() => setTab(item.key)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </View>
-
-        {loading ? (
-          <View className='empty-state'>正在载入项目…</View>
-        ) : list.length === 0 ? (
-          <View className='empty-state'>
-            <Text>暂无项目</Text>
-            <Button className='text-button' onClick={onRetry}>重新加载</Button>
-          </View>
-        ) : (
-          <View className='project-grid'>
-            {list.map((project) => (
-              <Button key={project.id} className='project-card' onClick={() => onOpen(project)}>
-                <View className='project-card__visual'>
-                  <MiniCar color={project.color} />
-                  {project.status === 'processing' ? (
-                    <View className='processing-badge'>
-                      <Text>生成中 {Math.min(99, Math.round(project.progress))}%</Text>
-                      <View className='processing-badge__track'>
-                        <View className='processing-badge__value' style={{ width: `${project.progress}%` }} />
-                      </View>
-                    </View>
-                  ) : (
-                    <Text className='model-badge'>◇ 3D</Text>
-                  )}
-                </View>
-                <View className='project-card__body'>
-                  <Text className='project-card__name'>{project.name}</Text>
-                  <Text className='project-card__meta'>{formatCreatedAt(project.createdAt)}</Text>
-                  <Text className='project-card__meta'>
-                    {project.photoCount} 张 · {project.status === 'done' ? formatFaces(project.faces) : '处理中'}
-                  </Text>
-                </View>
-              </Button>
-            ))}
-          </View>
-        )}
+      <View className='projects-header'>
+        <View className='eyebrow-row'><Text>Toy Scan / 3D</Text><Text>{String(projects.length).padStart(2, '0')} 项</Text></View>
+        <Text className='page-title'>项目</Text>
+        <Text className='page-description'>围着玩具车拍 10 张照片，得到一个可旋转的 3D 模型。</Text>
+        <View className='filter-tabs'>{TABS.map(item => <Button key={item.key} className={`filter-tab ${tab === item.key ? 'filter-tab--active' : ''}`} onClick={() => setTab(item.key)}>{item.label}</Button>)}</View>
       </View>
-
-      <Button className='floating-add' aria-label='新建扫描' onClick={onNew}>＋</Button>
+      <View className='screen-scroll projects-scroll'>
+        {loading ? <View className='empty-state'>正在载入项目…</View> : list.length === 0 ? <View className='empty-state'><Text>没有项目</Text><Button className='text-button' onClick={onRetry}>重新加载</Button></View> :
+        list.map(project => <Button key={project.id} className='project-row' onClick={() => onOpen(project)}>
+          <View className='project-thumb grid-paper'>{project.coverUrl ? <Image className='project-cover' src={project.coverUrl} mode='aspectFill' /> : <MiniCar color={project.color} />}</View>
+          <View className='project-copy'><Text className='project-number'>NO.{String(projects.length - projects.indexOf(project)).padStart(3, '0')}</Text><Text className='project-name'>{project.name}</Text><Text className='project-meta'>{formatCreatedAt(project.createdAt)} · {project.photoCount} 张{project.status === 'done' ? ` · ${formatFaces(project.faces)}` : ''}</Text>
+          {project.status === 'processing' && <View className='row-progress'><View style={{width: `${project.progress}%`}} /></View>}</View>
+          {project.status === 'processing' ? <Text className='project-percent'>{Math.min(99, Math.round(project.progress))}%</Text> : <Icon name='chevron' />}
+        </Button>)}
+      </View>
+      <View className='bottom-action'><Button className='primary-button' onClick={onNew}><Text>新建扫描</Text><Icon name='plus' inverse /></Button></View>
     </View>
   )
 }
-
